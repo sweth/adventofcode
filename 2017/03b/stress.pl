@@ -6,32 +6,32 @@ use DDP;
 use Algorithm::Combinatorics;
 use Math::PlanePath::SquareSpiral;
 my $path = Math::PlanePath::SquareSpiral->new;
-my %step2value;
-$step2value{1} = 1;
+my %square2value;
+$square2value{1} = 1;
+my $square = 1;
 
-while (<>) {
-    my ($input, $expected) = /(\d+)(?:\s?#\s?)?(\d+)?/;
-    my $step = 1;
-    while ($step++ < $input) {
-        my ($x, $y) = $path->n_to_xy($step);
-        $step2value{$step} ||= 0;
-        if (not $step2value{$step}) {
-            for my $x_boundary ($x-1 .. $x+1) {
-                for my $y_boundary ($y-1 .. $y+1) {
-                    my $step_neighbor_value =
-                        $step2value{$path->xy_to_n($x_boundary, $y_boundary)} || 0;
-                    if (
-                        $step_neighbor_value > 0 and not
-                        ($x == $x_boundary and $y == $y_boundary)
-                    ) {
-                        $step2value{$step} += $step_neighbor_value;
-                    }
-                };
-            }
+my $target = 347991;
+
+SQUARE: while (($square2value{$square} ||= 0) < $target ) {
+    my ($x, $y) = $path->n_to_xy($square);
+    if (not $square2value{$square}) {
+        for my $x_boundary ($x-1 .. $x+1) {
+            for my $y_boundary ($y-1 .. $y+1) {
+                my $square_neighbor_value =
+                    $square2value{$path->xy_to_n($x_boundary, $y_boundary)} || 0;
+                if (
+                    $square_neighbor_value > 0 and not
+                    ($x == $x_boundary and $y == $y_boundary)
+                ) {
+                    $square2value{$square} += $square_neighbor_value;
+                }
+            };
         }
+    }
+    if ($square2value{$square} > $target) {
+        last SQUARE;
+    } else {
+        $square++
     };
-
-    print "Input:\t$input\n";
-    print "Expected:\t$expected\n" if defined($expected);
-    print "Calculated:\t$step2value{$input}\n\n"; 
-}
+};
+print "$square: $square2value{$square}\n";
